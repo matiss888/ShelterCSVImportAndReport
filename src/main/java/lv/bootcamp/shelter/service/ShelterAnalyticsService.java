@@ -25,7 +25,13 @@ public class ShelterAnalyticsService {
         for(Animal animal : allAnimals) {
             uniqueSpecies.add(animal.getSpecies());
 
-            animalsBySpecies.put(animal.getSpecies(),animal);
+            animalsBySpecies
+                    .computeIfAbsent(animal.getSpecies(), func -> new ArrayList<>())
+                    .add(animal);
+
+            if(animal.getAge() == null) {
+                animalsNeedingVetInput.add(animal.getName() + "("+ animal.getSpecies() +")");
+            }
         }
 
 

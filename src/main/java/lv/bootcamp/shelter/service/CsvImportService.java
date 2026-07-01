@@ -71,7 +71,7 @@ public class CsvImportService {
                     continue;
                 }
             }
-            boolean vaccindated = Boolean.parseBoolean(vaccinatedData.toLowerCase());
+            boolean vaccinated = Boolean.parseBoolean(vaccinatedData.toLowerCase());
 
             LocalDate intakeDate;
             try {
@@ -82,7 +82,7 @@ public class CsvImportService {
                 continue;
             }
 
-            Animal animal = new Animal(nameData, speciesData, age, vaccindated,intakeDate);
+            Animal animal = new Animal(nameData, speciesData, age, vaccinated,intakeDate);
             allAnimals.add(animal);
         }
 
