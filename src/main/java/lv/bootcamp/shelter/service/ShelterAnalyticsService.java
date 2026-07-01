@@ -22,6 +22,13 @@ public class ShelterAnalyticsService {
         // - animalsBySpecies
         // - animalsNeedingVetInput with format name(species)
 
+        for(Animal animal : allAnimals) {
+            uniqueSpecies.add(animal.getSpecies());
+
+            animalsBySpecies.put(animal.getSpecies(),animal);
+        }
+
+
         // TODO Step 3:
         // Add necessary fields to ShelterReportData
         // Use stream pipelines for:

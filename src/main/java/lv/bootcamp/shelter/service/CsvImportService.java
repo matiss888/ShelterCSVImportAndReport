@@ -4,14 +4,22 @@ import lombok.extern.slf4j.Slf4j;
 import lv.bootcamp.shelter.model.Animal;
 import lv.bootcamp.shelter.service.data.ImportResult;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 public class CsvImportService {
 
-    public ImportResult importAnimals(Path inputPath) {
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+
+    public ImportResult importAnimals(Path inputPath) throws IOException {
         log.info("Starting import from {}", inputPath);
 
         List<Animal> allAnimals = new ArrayList<>();
@@ -24,6 +32,60 @@ public class CsvImportService {
         // 5) Parse intakeDate using DateTimeFormatter.
         // 6) Map each row to Animal object.
 
-        return new ImportResult(allAnimals, 0);
+        List<String> lines = Files.readAllLines(inputPath, StandardCharsets.UTF_8);
+
+        int skippedRows = 0;
+
+        for(int i = 1; i < lines.size(); i++) {
+            String oneCSVline = lines.get(i);
+            String[] parts = oneCSVline.split(",", -1);
+
+            if (parts.length != 5) {
+                log.warn("Skipping malformed row {}, {}", i + 1, oneCSVline);
+                skippedRows++;
+                continue;
+            }
+
+            String nameData = parts[0];
+            String speciesData = parts[1];
+            String ageData = parts[2];
+            String vaccinatedData = parts[3];
+            String intakeDateData = parts[4];
+
+            if (nameData.isEmpty() || speciesData.isEmpty()) {
+                log.warn("Skipping malformed row {}, {}", i + 1, oneCSVline);
+                skippedRows++;
+                continue;
+            }
+
+            Integer age;
+
+            if(ageData.isEmpty()) {
+                age = null;
+            } else {
+                try {
+                    age = Integer.parseInt(ageData);
+                } catch (NumberFormatException numberFormatException) {
+                    log.warn("Skipping row {}, because age must be a number ({})", i + 1, age);
+                    skippedRows++;
+                    continue;
+                }
+            }
+            boolean vaccindated = Boolean.parseBoolean(vaccinatedData.toLowerCase());
+
+            LocalDate intakeDate;
+            try {
+                intakeDate = LocalDate.parse(intakeDateData.trim(), DATE_FORMATTER);
+            } catch (DateTimeParseException dateTimeParseException) {
+                log.warn("Skipping row {}, invalid intake date ({})", i + 1, intakeDateData);
+                skippedRows++;
+                continue;
+            }
+
+            Animal animal = new Animal(nameData, speciesData, age, vaccindated,intakeDate);
+            allAnimals.add(animal);
+        }
+
+        return new ImportResult(allAnimals, skippedRows);
     }
 }

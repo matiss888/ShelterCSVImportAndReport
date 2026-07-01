@@ -6,6 +6,7 @@ import lv.bootcamp.shelter.service.ReportExportService;
 import lv.bootcamp.shelter.service.ShelterAnalyticsService;
 import lv.bootcamp.shelter.service.data.ShelterReportData;
 
+import java.io.IOException;
 import java.nio.file.Path;
 
 public class ShelterCsvApplication {
